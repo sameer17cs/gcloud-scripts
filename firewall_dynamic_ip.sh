@@ -4,11 +4,14 @@ set -e
 describe=null
 existing_ipv4=null
 my_ipv4=null
+my_ipv6=null
 
 #Get my public ip (v4) from internet
 get_my_public_ipv4() {
-    my_ipv4=`curl -s ifconfig.me`;
-    echo "my ip: $my_ipv4"
+    my_ipv4=`dig @resolver1.opendns.com A myip.opendns.com +short -4`
+    my_ipv6=`dig @resolver1.opendns.com AAAA myip.opendns.com +short -6`
+    echo "my ip v4: $my_ipv4"
+    echo "my ip v6: $my_ipv6"
 }
 
 map_source_ranges() {
