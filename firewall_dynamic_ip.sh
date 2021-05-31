@@ -14,10 +14,14 @@ get_my_public_ipv4() {
     echo "my ip v6: $my_ipv6"
 }
 
-map_source_ranges() {
+add_exisiting_ips() {
     N=3;
-    existing_ipv4=`echo $describe | awk -v N=$N '{print $N}'`
-    echo "Existing sources: $existing_ipv4"
+    existing_ipv4=`echo $describe`
+    rm1='SRC_RANGES:' rm2='DEST_RANGES:'
+    existing_ipv4=`echo ${existing_ipv4/$rm1/}`
+    existing_ipv4=`echo ${existing_ipv4/$rm2/}`
+    existing_ipv4=`echo ${existing_ipv4}| xargs`
+    echo "Existing Ips: $existing_ipv4"
 }
 
 #get details about my firewall rule
@@ -31,9 +35,13 @@ else
 
       #extract and map requisties
       get_my_public_ipv4
-      map_source_ranges
-      
+      add_exisiting_ips
+      finalList="$my_ipv4,$existing_ipv4"
+      finalList=`echo ${finalList}| xargs`
+      #final list can contain duplicates,it is handled by gcp
+      echo "FinalList Ips: $finalList"
+
       #update firewall rule
       gcloud compute firewall-rules update $FIREWALL_RULE --source-ranges=$existing_ipv4,$my_ipv4
-      echo "$FIREWALL_RULE updated ... "
+      echo "Firewall updated for tag: $FIREWALL_RULE"
 fi
